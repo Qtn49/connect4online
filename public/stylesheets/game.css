@@ -1,0 +1,7 @@
+#hover {
+    overflow-y: hidden;
+    max-height: 500px;
+
+    transform: translateY(-200px);
+    background-color: black;
+}
