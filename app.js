@@ -73,10 +73,11 @@ wss.on('connection', (ws) => {
                 break;
             case 'played':
                 let row = gameboard.play(data[1], redTurn);
+                let result = gameboard.checkWinner(row, data[1]);
 
-                if (gameboard.checkWinner(row, data[1])) {
+                if (result.length > 0) {
 
-                    ws.send('win:' + JSON.stringify(redTurn) + ':' + row + ':' + data[1]);
+                    ws.send('win:' + JSON.stringify(redTurn) + ':' + JSON.stringify(result));
 
                 }
 

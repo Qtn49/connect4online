@@ -30,13 +30,17 @@ class GameBoard {
 
     checkWinner(row, column) {
 
-        if (this.checkVertical(row, column))
-            return true;
+        var coords = [];
 
-        if (this.checkRow(row, column))
-            return true;
+        coords.push(this.checkVertical(row, column));
 
-        // return false;
+        coords.push(this.checkRow(row, column));
+
+        coords = coords.filter(value => value);
+
+        console.log(coords)
+
+        return coords;
 
     }
 
@@ -51,13 +55,11 @@ class GameBoard {
 
         }
 
-        return n === 4;
+        return n === 4 ? [i + 1, parseInt(column), parseInt(row), parseInt(column)] : null;
 
     }
 
     checkRow(row, column) {
-
-        console.log(row, column);
 
         let i = column, value = this._board[column][row], n = 0;
 
@@ -66,8 +68,8 @@ class GameBoard {
             i--;
 
         }
-    
-        // i++;
+
+        let start = i;
 
         while (this._board[i][row] === value) {
 
@@ -76,9 +78,7 @@ class GameBoard {
 
         }
 
-        // console.log()
-
-        return n === 4;
+        return n === 4 ? [parseInt(row), parseInt(start), parseInt(row), i] : null;
 
     }
 

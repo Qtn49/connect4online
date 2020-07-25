@@ -3,7 +3,6 @@ var hover = document.getElementById('hover');
 var newPiece = document.getElementById('new_piece');
 var board = document.getElementById('board');
 var play;
-var show = true;
 var playing = false;
 var over = false;
 var column;
@@ -15,7 +14,7 @@ ws.onopen = () => {
 };
 
 svg.addEventListener('mousemove', function (event) {
-    if (!show || over)
+    if (over)
         return;
     hover.setAttribute('visibility', 'visible');
     hover.setAttribute('x', event.clientX - event.clientX % 100 - 600);
@@ -25,7 +24,6 @@ svg.addEventListener('mousemove', function (event) {
 
 svg.addEventListener('mouseleave', function () {
     hideAll();
-    show = true;
 });
 
 svg.addEventListener('mousedown', function (event) {
@@ -101,15 +99,35 @@ function gameOver (redTurn) {
 
 }
 
-function flashy (row, column) {
+function flashy (coords) {
 
-    var piece = [];
+    let pieces = [];
 
-    for (let i = 0; i < 4; i++) {
-        piece.push(document.querySelector('[row = "' + row-- + '"][column = "' + column +'"]'));
+    for (let c of coords) {
+
+        if (c[1] === c[3]) {
+
+            for (let i = c[0]; i <= c[2]; i++) {
+
+                pieces.push(document.querySelector('[row = "' + i + '"][column = "' + c[1] + '"]'));
+                console.log(document.querySelector('[row = "' + i + '"][column = "' + c[1] + '"]'), i, c[1])
+
+            }
+
+        }else if (c[0] === c[2]) {
+
+            for (let i = c[1]; i <= c[3]; i++) {
+
+                pieces.push(document.querySelector('[row = "' + c[0] + '"][column = "' + i + '"]'));
+
+            }
+        }
+
     }
 
-    for (var p of piece) {
+    pieces = pieces.filter((value, index, array) => array.indexOf(value) === index);
+
+    for (var p of pieces) {
         if (p) {
             p.style.opacity = p.style.opacity * -1 + 1;
         }
@@ -126,11 +144,10 @@ ws.onmessage = (message) => {
             break;
         case 'play':
             playTurn(data[1], JSON.parse(data[2]));
-            show = false;
             break;
         case 'win':
             gameOver(JSON.parse(data[1]));
-            setInterval(flashy, 500, data[2], data[3]);
+            setInterval(flashy, 500, JSON.parse(data[2]));
             break;
 
     }
