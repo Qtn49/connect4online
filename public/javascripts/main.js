@@ -16,7 +16,7 @@ ws.onopen = () => {
 window.onload = init();
 
 svg.addEventListener('mousemove', onHover);
-svg.addEventListener('touchmove', onHover);
+// svg.addEventListener('touchmove', onHover);
 
 svg.addEventListener('mouseleave', function () {
     hideAll();
