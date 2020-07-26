@@ -13,25 +13,43 @@ ws.onopen = () => {
     ws.send('start');
 };
 
-svg.addEventListener('mousemove', function (event) {
-    if (over)
-        return;
-    hover.setAttribute('visibility', 'visible');
-    hover.setAttribute('x', event.clientX - event.clientX % 100 - 600);
-    newPiece.setAttribute('visibility', 'visible');
-    newPiece.setAttribute('cx', event.clientX - event.clientX % 100 - 600 + 50);
-});
+window.onload = init();
+
+svg.addEventListener('mousemove', onHover);
+svg.addEventListener('touchmove', onHover);
 
 svg.addEventListener('mouseleave', function () {
     hideAll();
 });
 
-svg.addEventListener('mousedown', function (event) {
+svg.addEventListener('mousedown', onClick);
+// svg.addEventListener('touchend', onClick);
+
+function onHover (event) {
+
+    if (over)
+        return;
+
+    console.log(event)
+
+    hover.setAttribute('visibility', 'visible');
+    hover.setAttribute('x', event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100);
+    newPiece.setAttribute('visibility', 'visible');
+    newPiece.setAttribute('cx', event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100 + (svg.clientWidth / 7) / 2);
+    console.log(event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100, event.clientX);
+    
+}
+
+function onClick (event) {
+
+    console.log('oh hé')
+
     if (!playing && !over) {
-        column = (event.clientX - event.clientX % 100 - 600) / 100;
+        column = (event.clientX - event.clientX % 100 - (svg.getBoundingClientRect().x - svg.getBoundingClientRect().x % 100)) / 100;
         ws.send('played:' + column);
     }
-});
+
+}
 
 function goDown (piece, hover, row) {
 
@@ -121,6 +139,24 @@ function flashy (coords) {
                 pieces.push(document.querySelector('[row = "' + c[0] + '"][column = "' + i + '"]'));
 
             }
+        }else {
+
+            let row = c[0], column = c[1];
+
+            for (let i = 0; i < 4; i++) {
+
+                pieces.push(document.querySelector('[row = "' + row + '"][column = "' + column + '"]'));
+                console.log(i, document.querySelector('[row = "' + row + '"][column = "' + column + '"]'));
+
+                row++;
+
+                if (c[1] < c[3])
+                    column++;
+                else
+                    column--;
+
+            }
+
         }
 
     }
@@ -152,3 +188,11 @@ ws.onmessage = (message) => {
 
     }
 };
+
+function init () {
+
+    console.log(svg.clientWidth)
+    // svg.setAttribute('width', '' + innerWidth / (1920 / 700));
+    // svg.setAttribute('height', '' + innerHeight / (1920 / 600));
+
+}
