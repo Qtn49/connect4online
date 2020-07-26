@@ -14,7 +14,6 @@ ws.onopen = () => {
 };
 
 window.onload = init();
-window.onorientationchange = alert('bruh');
 
 svg.addEventListener('mousemove', onHover);
 // svg.addEventListener('touchmove', onHover);
@@ -203,4 +202,7 @@ function init () {
         }
 
     }
+
+    if (innerHeight < svg.clientHeight)
+        svg.style.scale = 0.5;
 }
