@@ -14,6 +14,7 @@ ws.onopen = () => {
 };
 
 window.onload = init();
+window.onorientationchange = alert('bruh');
 
 svg.addEventListener('mousemove', onHover);
 // svg.addEventListener('touchmove', onHover);
@@ -194,5 +195,12 @@ function init () {
     console.log(svg.clientWidth)
     // svg.setAttribute('width', '' + innerWidth / (1920 / 700));
     // svg.setAttribute('height', '' + innerHeight / (1920 / 600));
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 
+        if(window.innerHeight > window.innerWidth){
+            alert("Please use Landscape!");
+            svg.style.display = "none";
+        }
+
+    }
 }
