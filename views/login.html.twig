@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheet %}
+
+    {{ parent() }}
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/login.css">
+
+{% endblock %}
+
+{% block body %}
+
+    {{ parent() }}
+
+    <div class="wrapper fadeInDown">
+        <div id="formContent">
+            <!-- Tabs Titles -->
+
+            <!-- Icon -->
+            <div class="fadeIn first">
+                <img src="images/icon.png" id="icon" alt="User Icon" />
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" action="/newPlayer">
+                <input type="text" id="login" class="fadeIn second" name="login" placeholder="pseudo">
+{#                <input type="text" id="password" class="fadeIn third" name="login" placeholder="password">#}
+                <input type="button" class="fadeIn fourth" value="Log In">
+            </form>
+
+            {% if error %}
+
+                <div class="alert alert-warning mx-3">
+                    <strong>Warnig !</strong> The name isn't correct. Maybe it's already used or it contains ':'
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+{% endblock %}

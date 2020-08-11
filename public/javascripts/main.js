@@ -6,8 +6,9 @@ var play;
 var playing = false;
 var over = false;
 var column;
+const sep = '#';
 
-const ws = new WebSocket("ws://localhost:9000");
+const ws = new WebSocket("ws://quentin-vivobook:9000");
 
 ws.onopen = () => {
     ws.send('start');
@@ -30,23 +31,19 @@ function onHover (event) {
     if (over)
         return;
 
-    console.log(event)
-
-    hover.setAttribute('visibility', 'visible');
+    // hover.setAttribute('visibility', 'visible');
     hover.setAttribute('x', event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100);
     newPiece.setAttribute('visibility', 'visible');
     newPiece.setAttribute('cx', event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100 + (svg.clientWidth / 7) / 2);
-    console.log(event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100, event.clientX);
-    
+
 }
 
 function onClick (event) {
 
-    console.log('oh hé')
-
     if (!playing && !over) {
-        column = (event.clientX - event.clientX % 100 - (svg.getBoundingClientRect().x - svg.getBoundingClientRect().x % 100)) / 100;
-        ws.send('played:' + column);
+        hover.setAttribute('visibility', 'visible');
+        column = parseInt((event.clientX - svg.getBoundingClientRect().x) / 100);
+        ws.send('played' + sep + + column);
     }
 
 }
@@ -172,7 +169,7 @@ function flashy (coords) {
 }
 
 ws.onmessage = (message) => {
-    var data = message.data.split(':');
+    var data = message.data.split(sep);
     switch (data[0]) {
 
         case 'start':
@@ -185,24 +182,20 @@ ws.onmessage = (message) => {
             gameOver(JSON.parse(data[1]));
             setInterval(flashy, 500, JSON.parse(data[2]));
             break;
+        case 'game':
+            console.log(data[1])
+            break;
 
     }
 };
 
 function init () {
 
-    console.log(svg.clientWidth)
-    // svg.setAttribute('width', '' + innerWidth / (1920 / 700));
-    // svg.setAttribute('height', '' + innerHeight / (1920 / 600));
-    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    if (innerWidth < svg.clientWidth || innerHeight < svg.clientHeight) {
 
-        if(window.innerHeight > window.innerWidth){
-            alert("Please use Landscape!");
-            svg.style.display = "none";
-        }
+        alert('sorry but your device is too small');
+        document.body.style.display = "none";
 
     }
 
-    if (innerHeight < svg.clientHeight)
-        svg.style.scale = 0.5;
 }

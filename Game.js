@@ -1,6 +1,7 @@
 class Game {
 
     _gameboards = {};
+    _players = {};
 
     constructor () {
 
@@ -9,6 +10,16 @@ class Game {
     addGameBoard (gameBoard) {
 
         this._gameboards[this.generateId()] = gameBoard;
+
+    }
+
+    addPlayer (player) {
+
+        let id = this.generateId();
+
+        this._players[id] = player;
+
+        return id;
 
     }
 
@@ -24,19 +35,29 @@ class Game {
 
             }
 
-        }while (this.getGameBoard(id));
+        }while (this.getPlayer(id));
 
         return id;
 
     }
 
-    getGameBoard (id) {
+    getPlayer (id) {
 
-        return this._gameboards[id];
+        return this._players[id];
+
+    }
+
+    broadcast (message) {
+
+        for (let [,p] of Object.entries(this._players)) {
+
+            console.log(p)
+            p.ws.send(message);
+
+        }
 
     }
 
 }
 
 exports.Game = Game;
-exports.generate

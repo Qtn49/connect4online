@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {{ parent() }}
+
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <h1>Bienvenue {{ pseudo }}</h1>
+        </div>
+    </div>
+
+    <div class="container mt-5" id="listUser">
+        <div class="row justify-content-md-center" id="user" style="visibility: hidden">
+            <p class="border border-warning p-2"><strong class="mr-2">legrobigbossdu54 </strong><a href="#" class="btn btn-success">invite</a></p>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+    {{ parent() }}
+
+    <script>
+        const ws = new WebSocket("ws://quentin-vivobook:9000");
+        const sep = '#';
+        let list = document.getElementById('listUser');
+        let user = document.getElementById('user');
+        var id = {{ id }};
+
+        ws.onopen = () => {
+            ws.send('newPlayer' + sep + id);
+        };
+
+        function cleanList() {
+
+            while (list.firstChild)
+                list.removeChild(list.lastChild);
+
+        }
+
+        ws.onmessage = (message) => {
+
+            let data = message.data.split(sep);
+
+            switch (data[0]) {
+
+                case 'newPlayer':
+
+                    let players = JSON.parse(data[1]);
+
+                    cleanList();
+
+                    for (let [playerId, player] of Object.entries(players)) {
+
+                        console.log(playerId, player);
+
+                        if (playerId == id)
+                            continue;
+
+                        console.log('coucou ' + player._pseudo, player);
+
+                        let newUser = user.cloneNode(true);
+
+                        newUser.style.visibility = "visible";
+                        newUser.querySelector('strong').textContent = player._pseudo;
+
+                        list.appendChild(newUser);
+
+                    }
+
+                    break;
+
+            }
+
+        };
+
+    </script>
+
+{% endblock %}
