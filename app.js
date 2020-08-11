@@ -49,7 +49,10 @@ app.get('/login', function(req, res, next) {
 
 /* GET waiting page. */
 app.get('/wait', function(req, res, next) {
-    res.render('wait.html.twig');
+    res.render('wait.html.twig', {
+        pseudo: req.query.pseudo,
+        id: req.query.id,
+    });
 });
 
 app.get('/newPlayer', function (req, res) {
@@ -60,20 +63,12 @@ app.post('/newPlayer', function(req, res) {
 
     let pseudo = req.body.login;
 
-    console.log(pseudo);
-
-    console.log(typeof pseudo);
-    console.log(checkPseudo(pseudo));
-
     if (checkPseudo(pseudo)) {
 
         var player = new Player(pseudo);
         let id = game.addPlayer(player);
 
-        res.render('wait.html.twig', {
-            pseudo: pseudo,
-            id: id
-        });
+        res.redirect('/wait?pseudo=' + pseudo + '&id=' + id);
 
     }else {
 
