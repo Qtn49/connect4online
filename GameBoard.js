@@ -1,10 +1,12 @@
 class GameBoard {
 
     _board;
+    _players = [];
 
-    constructor() {
+    constructor (player1, player2) {
 
         this._board = new Array(7).fill(0).map(() => new Array(6).fill(0));
+        this._players.push(player1, player2);
 
     }
 

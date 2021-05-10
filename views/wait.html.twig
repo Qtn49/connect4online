@@ -12,7 +12,7 @@
 
     <div class="container mt-5" id="listUser">
         <div class="row justify-content-md-center" id="user" style="visibility: hidden">
-            <p class="border border-warning p-2"><strong class="mr-2">legrobigbossdu54 </strong><a href="#" class="btn btn-success">invite</a></p>
+            <p class="border border-warning p-2"><strong class="mr-2">legrobigbossdu54 </strong><a href="#" class="btn btn-success" onclick="invite(this.parentElement)">invite</a></p>
         </div>
     </div>
 
@@ -27,10 +27,11 @@
         const sep = '#';
         let list = document.getElementById('listUser');
         let user = document.getElementById('user');
-        var id = {{ id }};
+        var id = "{{ id }}";
 
         ws.onopen = () => {
             ws.send('newPlayer' + sep + id);
+            console.log('newPlayer' + sep + id);
         };
 
         function cleanList() {
@@ -63,18 +64,52 @@
 
                         let newUser = user.cloneNode(true);
 
+                        newUser.setAttribute('playerId', playerId);
                         newUser.style.visibility = "visible";
                         newUser.querySelector('strong').textContent = player._pseudo;
 
                         list.appendChild(newUser);
 
                     }
+                    break;
 
+                case 'invite':
+                    let player = JSON.parse(data[1]);
+                    invitation(data[1], data[2]);
                     break;
 
             }
 
         };
+
+        function invitation (idOpponent, pseudo) {
+
+            bootbox.confirm({
+                message: pseudo + " invited you, do you wanna play ?",
+                buttons: {
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> Cancel'
+                    },
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Confirm'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        ws.send('multiplay' + sep + id + sep + idOpponent);
+                    }
+                }
+            });
+
+        }
+
+        function invite (element) {
+
+            ws.send('invite' + sep + element.parentElement.getAttribute('playerId') + sep + id);
+
+            return false;
+
+        }
 
     </script>
 

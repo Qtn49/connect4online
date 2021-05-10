@@ -23,9 +23,8 @@
 
             <!-- Login Form -->
             <form method="post" action="/newPlayer">
-                <input type="text" id="login" class="fadeIn second" name="login" placeholder="pseudo">
-{#                <input type="text" id="password" class="fadeIn third" name="login" placeholder="password">#}
-                <input type="button" class="fadeIn fourth" value="Log In">
+                <input type="text" id="login" class="fadeIn second" name="login" placeholder="pseudo" autofocus>
+                <input type="submit" class="fadeIn fourth" value="Log In">
             </form>
 
             {% if error %}

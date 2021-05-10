@@ -1,15 +1,24 @@
+const uniqid = require('uniqid');
+
 class Player {
 
+
+    _id;
     _ws = null;
     _color = "";
     _pseudo = "";
 
     constructor (pseudo) {
 
+        this._id = uniqid();
         this._pseudo = pseudo;
 
     }
 
+    get id() {
+        return this._id;
+    }
+    
     get ws() {
         return this._ws;
     }

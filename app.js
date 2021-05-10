@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var Twig = require('twig');
+const session = require('cookie-session');
 const sep = '#';
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({port: 9000});
@@ -12,7 +13,6 @@ const GameBoard = require('./GameBoard');
 const Player = require('./Player').Player;
 
 var app = express();
-
 var players = {};
 
 var game = new Game.Game();
@@ -31,6 +31,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+        secret: 'secret session'
+}));
 
 /* GET home page. */
 app.get('/', function(req, res, next) {
@@ -48,11 +51,20 @@ app.get('/login', function(req, res, next) {
 });
 
 /* GET waiting page. */
-app.get('/wait', function(req, res, next) {
+app.get('/wait', function(req, res) {
+
+    if (!req.session.player) {
+
+        res.redirect('/login');
+        return;
+    }
+
     res.render('wait.html.twig', {
-        pseudo: req.query.pseudo,
-        id: req.query.id,
+        pseudo: req.session.player._pseudo,
+        id: req.session.player._id
+
     });
+
 });
 
 app.get('/newPlayer', function (req, res) {
@@ -65,10 +77,10 @@ app.post('/newPlayer', function(req, res) {
 
     if (checkPseudo(pseudo)) {
 
-        var player = new Player(pseudo);
-        let id = game.addPlayer(player);
+        let player = req.session.player = new Player(pseudo);
+        game.addPlayer(player);
 
-        res.redirect('/wait?pseudo=' + pseudo + '&id=' + id);
+        res.redirect('/wait');
 
     }else {
 
@@ -97,10 +109,7 @@ app.use(function(err, req, res, next) {
 
 function checkPseudo (pseudo) {
 
-    if (pseudo.includes(':'))
-        return false;
-
-    return true;
+    return !pseudo.includes(sep);
 
 }
 
@@ -123,7 +132,7 @@ wss.on('connection', (ws) => {
                 gameboard = new GameBoard.GameBoard();
                 redTurn = Math.random() < 0.5;
 
-                ws.send('start' + sep + + JSON.stringify(redTurn));
+                ws.send('start' + sep + JSON.stringify(redTurn));
                 break;
             case 'played':
                 let row = gameboard.play(data[1], redTurn);
@@ -131,7 +140,7 @@ wss.on('connection', (ws) => {
 
                 if (result.length > 0) {
 
-                    ws.send('win' + sep + + JSON.stringify(redTurn) + sep + JSON.stringify(result));
+                    ws.send('win' + sep + JSON.stringify(redTurn) + sep + JSON.stringify(result));
 
                 }
 
@@ -151,6 +160,15 @@ wss.on('connection', (ws) => {
                 game.broadcast('newPlayer' + sep + JSON.stringify(game._players));
 
                 break;
+
+            case 'invite':
+
+                let invited = game.getPlayer(data[1]);
+                invited.ws.send('invite' + sep + data[2] + sep + game.getPlayer(data[2])._pseudo);
+
+            case 'multiplay':
+
+                game.addGameBoard(new GameBoard())
 
         }
 

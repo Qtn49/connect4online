@@ -8,7 +8,7 @@ var over = false;
 var column;
 const sep = '#';
 
-const ws = new WebSocket("ws://quentin-vivobook:9000");
+const ws = new WebSocket("ws://localhost:9000");
 
 ws.onopen = () => {
     ws.send('start');

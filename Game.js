@@ -1,7 +1,7 @@
 class Game {
 
     _gameboards = {};
-    _players = {};
+    _players = [];
 
     constructor () {
 
@@ -9,41 +9,21 @@ class Game {
 
     addGameBoard (gameBoard) {
 
-        this._gameboards[this.generateId()] = gameBoard;
+
 
     }
 
     addPlayer (player) {
 
-        let id = this.generateId();
-
-        this._players[id] = player;
-
-        return id;
-
-    }
-
-    generateId (length = 4) {
-
-        var id = "";
-
-        do {
-
-            for (let i = 0; i < length; i++) {
-
-                id += Math.floor(Math.random() * 10);
-
-            }
-
-        }while (this.getPlayer(id));
-
-        return id;
+        this._players.push(player);
 
     }
 
     getPlayer (id) {
 
-        return this._players[id];
+        return this._players.find(player => {
+            return player._id.toString() === id.toString();
+        });
 
     }
 
