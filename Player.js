@@ -7,6 +7,7 @@ class Player {
     _ws = null;
     _color = "";
     _pseudo = "";
+    _playing = false;
 
     constructor (pseudo) {
 
@@ -41,6 +42,14 @@ class Player {
 
     set pseudo(value) {
         this._pseudo = value;
+    }
+
+    get playing() {
+        return this._playing;
+    }
+
+    set playing(value) {
+        this._playing = value;
     }
 
 }

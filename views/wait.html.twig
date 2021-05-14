@@ -23,7 +23,7 @@
     {{ parent() }}
 
     <script>
-        const ws = new WebSocket("ws://quentin-vivobook:9000");
+        const ws = new WebSocket("ws://localhost:9000");
         const sep = '#';
         let list = document.getElementById('listUser');
         let user = document.getElementById('user');
@@ -55,16 +55,12 @@
 
                     for (let [playerId, player] of Object.entries(players)) {
 
-                        console.log(playerId, player);
-
-                        if (playerId == id)
+                        if (player._id === id)
                             continue;
-
-                        console.log('coucou ' + player._pseudo, player);
 
                         let newUser = user.cloneNode(true);
 
-                        newUser.setAttribute('playerId', playerId);
+                        newUser.setAttribute('playerId', player._id);
                         newUser.style.visibility = "visible";
                         newUser.querySelector('strong').textContent = player._pseudo;
 
@@ -74,8 +70,14 @@
                     break;
 
                 case 'invite':
-                    let player = JSON.parse(data[1]);
+                    let player = data[1];
+                    console.log(ws);
                     invitation(data[1], data[2]);
+                    break;
+
+                case 'startGame':
+                    console.log(ws);
+                    location.href = '/newMultiGame?id=' + id + '&idOpponent=' + data[1];
                     break;
 
             }
@@ -96,7 +98,7 @@
                 },
                 callback: function (result) {
                     if (result) {
-                        ws.send('multiplay' + sep + id + sep + idOpponent);
+                        location.href = '/newMultiGame?invited=true&id=' + id + '&idOpponent=' + idOpponent;
                     }
                 }
             });
@@ -104,6 +106,11 @@
         }
 
         function invite (element) {
+
+            if (element.querySelector('a').textContent === 'inviting...')
+                return false;
+            else
+                element.querySelector('a').textContent = 'inviting...';
 
             ws.send('invite' + sep + element.parentElement.getAttribute('playerId') + sep + id);
 

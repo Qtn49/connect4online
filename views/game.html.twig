@@ -4,7 +4,7 @@
 
     {{ parent() }}
 
-    <link href="game.css">
+    <link href="stylesheets/game.css">
 
 {% endblock %}
 
@@ -12,45 +12,53 @@
 
 {{ parent() }}
 
-<div class="container">
-    <div class="row">
-        <h1>Connect 4</h1>
+<main>
+
+    <div class="container user-select-none">
+        <div class="row">
+            <h1>Connect 4</h1>
+        </div>
+        <div class="row">
+            <p>Welcome to the online connect 4</p>
+        </div>
     </div>
-    <div class="row">
-        <p>Welcome to the online connect 4</p>
+
+    <div class="container user-select-none">
+        <h1 class="align-self-center text-center"><span id="player"></span> turn</h1>
     </div>
-</div>
 
-<svg id="svg" style="display: block;margin: auto" width="700" height="600">
+    <svg id="svg" style="display: block;margin: auto" width="700" height="600">
 
-    <defs>
-        <linearGradient id="yellow-gradient"
-                        x1="0" y1="0" x2="0" y2="100%">
-            <stop offset="0%" stop-color="yellow" stop-opacity="0.1" />
-            <stop offset="100%" stop-color="yellow" stop-opacity="1" />
-        </linearGradient>
-    </defs>
+        <defs>
+            <linearGradient id="yellow-gradient"
+                            x1="0" y1="0" x2="0" y2="100%">
+                <stop offset="0%" stop-color="yellow" stop-opacity="0.1" />
+                <stop offset="100%" stop-color="yellow" stop-opacity="1" />
+            </linearGradient>
+        </defs>
 
-    <defs>
-        <linearGradient id="red-gradient"
-                        x1="0" y1="0" x2="0" y2="100%">
-            <stop offset="0%" stop-color="red" stop-opacity="0.1" />
-            <stop offset="100%" stop-color="red" stop-opacity="1" />
-        </linearGradient>
-    </defs>
+        <defs>
+            <linearGradient id="red-gradient"
+                            x1="0" y1="0" x2="0" y2="100%">
+                <stop offset="0%" stop-color="red" stop-opacity="0.1" />
+                <stop offset="100%" stop-color="red" stop-opacity="1" />
+            </linearGradient>
+        </defs>
 
-    <rect width="700" height="500" style="fill: blue; stroke-width: 10;" y="30" id="board" />
+        <rect width="700" height="500" style="fill: blue; stroke-width: 10;" y="30" id="board" />
 
-    {% for i in 0..5 %}
-        {% for j in 0..6 %}
-            <circle r="30" cx="{{ 100 * j + 50  }}" cy="{{ 80 * (i + 1) }}" fill="white" />
+        {% for i in 0..5 %}
+            {% for j in 0..6 %}
+                <circle r="30" cx="{{ 100 * j + 50  }}" cy="{{ 80 * (i + 1) }}" fill="white" />
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
 
-    <circle id="new_piece" r="30" fill="red" cy="30" cx="50" visibility="hidden" style="z-index: -1;opacity: 1;" />
+        <circle id="new_piece" r="30" fill="red" cy="30" cx="50" visibility="hidden" style="z-index: -1;opacity: 1;" />
 
-    <rect id="hover" width="100" height="500" fill="url(#red-gradient)" visibility="hidden" y="30" />
-</svg>
+        <rect id="hover" width="100" height="500" fill="url(#red-gradient)" visibility="hidden" y="30" />
+    </svg>
+
+</main>
 
 {% endblock %}
 
@@ -58,6 +66,13 @@
 
     {{ parent() }}
 
+    <script>
+        var mode = '{{ mode }}';
+        var players = [];
+        var gameboardId = {{ gameboardId }};
+        players.push({{ player1 }});
+        players.push({{ player2 }});
+    </script>
     <script src="javascripts/main.js"></script>
 
 {% endblock %}

@@ -23,8 +23,14 @@
 
             <!-- Login Form -->
             <form method="post" action="/newPlayer">
-                <input type="text" id="login" class="fadeIn second" name="login" placeholder="pseudo" autofocus>
-                <input type="submit" class="fadeIn fourth" value="Log In">
+                {% if mode == 'multi' %}
+                    <input type="text" id="login" class="fadeIn second" name="login" placeholder="player" autofocus>
+                    <input type="submit" class="fadeIn fourth" value="Log In">
+                {% else %}
+                    <input type="text" name="player1" id="player1" class="fadeIn second" placeholder="player 1" autofocus>
+                    <input type="text" name="player2" id="player2" class="fadeIn second" placeholder="player 2">
+                    <input type="submit" class="fadeIn fourth" value="Start playing !">
+                {% endif %}
             </form>
 
             {% if error %}

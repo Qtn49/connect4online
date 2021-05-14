@@ -5,3 +5,13 @@
     transform: translateY(-200px);
     background-color: black;
 }
+
+.disable-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+body {
+}

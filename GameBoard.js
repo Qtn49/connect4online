@@ -1,11 +1,19 @@
+const uniqid = require('uniqid');
+
 class GameBoard {
 
+    _id;
     _board;
     _players = [];
 
     constructor (player1, player2) {
 
+        this._id = uniqid();
         this._board = new Array(7).fill(0).map(() => new Array(6).fill(0));
+        if (Math.random() < 0.5)
+            player1._playing = true;
+        else
+            player2._playing = true;
         this._players.push(player1, player2);
 
     }
@@ -44,8 +52,6 @@ class GameBoard {
 
         coords = coords.filter(value => value);
 
-        console.log('win', coords)
-
         return coords;
 
     }
@@ -71,15 +77,12 @@ class GameBoard {
 
         while (i > 0 && this._board[i - 1][row] === value) {
             i--;
-            console.log('bite 1')
-
         }
 
         let start = i;
 
         while (i <= 6 && this._board[i][row] === value) {
 
-            console.log(i)
             i++;
             n++;
 
@@ -107,8 +110,6 @@ class GameBoard {
             j++;
             n++;
 
-            console.log(i)
-
         }
 
         return n === 4 ? [parseInt(rowStart), parseInt(columnStart), j - 1, i - 1] : null;
@@ -119,12 +120,9 @@ class GameBoard {
 
         let i = parseInt(column), j = row, value = this._board[column][row], n = 0;
 
-        console.log('yo', i + 1, this._board[i])
-
         while (i < 6 && j > 0 && this._board[i + 1][j - 1] === value) {
             i++;
             j--;
-            console.log('value', i)
 
         }
 
@@ -136,14 +134,38 @@ class GameBoard {
             j++;
             n++;
 
-            console.log(i)
-
         }
 
         return n === 4 ? [parseInt(rowStart), parseInt(columnStart), j - 1, i - 1] : null;
 
     }
 
+    reset() {
+        this._board = new Array(7).fill(0).map(() => new Array(6).fill(0));
+        this.players.forEach(el => {
+            el._playing = false;
+        });
+        if (Math.random() < 0.5)
+            this.players[0]._playing = true;
+        else
+            this.players[1]._playing = true;
+    }
+
+    getCurrentPlayer() {
+        return this._players.filter(p => p._playing)[0];
+    }
+
+    getWaitingPlayer() {
+        return this._players.filter(p => !p._playing)[0];
+    }
+
+    get id() {
+        return this._id;
+    }
+
+    get players() {
+        return this._players;
+    }
 }
 
 exports.GameBoard = GameBoard;

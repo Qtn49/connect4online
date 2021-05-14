@@ -45,9 +45,22 @@ app.get('/play', function(req, res, next) {
     res.render('game.html.twig');
 });
 
-/* GET multi-player page. */
-app.get('/login', function(req, res, next) {
-    res.render('login.html.twig');
+/**
+ * GET solo login page
+ */
+app.get('/solo', function (req, res) {
+    res.render('login.html.twig', {
+        'mode': 'solo'
+    });
+});
+
+/**
+ * GET multi login page
+ */
+app.get('/multi', function (req, res) {
+    res.render('login.html.twig', {
+        'mode': 'multi'
+    });
 });
 
 /* GET waiting page. */
@@ -73,14 +86,42 @@ app.get('/newPlayer', function (req, res) {
 
 app.post('/newPlayer', function(req, res) {
 
-    let pseudo = req.body.login;
+    if (typeof req.body.login !== "undefined") {
 
-    if (checkPseudo(pseudo)) {
+        let pseudo = req.body.login;
 
-        let player = req.session.player = new Player(pseudo);
-        game.addPlayer(player);
+        if (checkPseudo(pseudo)) {
 
-        res.redirect('/wait');
+            let player = req.session.player = new Player(pseudo);
+            game.addPlayer(player);
+
+            res.redirect('/wait');
+
+        }else {
+
+            res.render('login.html.twig', {
+                error: true
+            });
+
+        }
+
+    }else if (typeof req.body.player1 !== "undefined" && typeof req.body.player2 !== "undefined") {
+
+        let player1 = new Player(req.body.player1);
+        let player2 = new Player(req.body.player2);
+
+        player1._color = 'red';
+        player2._color = 'yellow';
+
+        gameboard = new GameBoard.GameBoard(player1, player2);
+        game.addGameBoard(gameboard);
+
+        res.render('game.html.twig', {
+            'mode': 'solo',
+            'player1': JSON.stringify(player1),
+            'player2': JSON.stringify(player2),
+            'gameboardId': JSON.stringify(gameboard._id),
+        });
 
     }else {
 
@@ -89,12 +130,47 @@ app.post('/newPlayer', function(req, res) {
         });
 
     }
+
+});
+
+app.get('/newMultiGame', function (req, res) {
+
+    player = game.getPlayer(req.query.id);
+    opponentPlayer = game.getPlayer(req.query.idOpponent);
+
+    if (req.query.invited) {
+        player._color = 'red';
+        opponentPlayer._color = 'yellow';
+
+        gameboard = new GameBoard.GameBoard(player, opponentPlayer);
+        game.addGameBoard(gameboard);
+
+        res.render('game.html.twig', {
+            'mode': 'multi',
+            'player1': JSON.stringify(player),
+            'player2': JSON.stringify(opponentPlayer),
+            'gameboardId': JSON.stringify(gameboard._id),
+        });
+        opponentPlayer._ws.send('startGame' + sep + req.query.id);
+        
+    }else {
+
+        res.render('game.html.twig', {
+            'mode': 'multi',
+            'player1': JSON.stringify(player),
+            'player2': JSON.stringify(opponentPlayer),
+            'gameboardId': JSON.stringify(gameboard._id),
+        });
+
+    }
 });
 
 // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
+app.get('*', function(req, res, next) {
+
+    res.status(404).render('404.html.twig');
+
+});
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -122,21 +198,21 @@ var gameboard;
 wss.on('connection', (ws) => {
 
     ws.on('message', (message) => {
-        console.log(message);
         let data = message.split(sep);
-        console.log(data);
 
         switch (data[0]) {
 
-            case 'start':
-                gameboard = new GameBoard.GameBoard();
-                redTurn = Math.random() < 0.5;
+            case 'initiateGame':
+                console.log(data);
+                gameboard = game.findGameBoardById(JSON.parse(data[1]));
 
-                ws.send('start' + sep + JSON.stringify(redTurn));
+                ws.send('start' + sep + JSON.stringify(gameboard.getCurrentPlayer()._id) + sep + JSON.stringify(gameboard._id));
                 break;
+
             case 'played':
-                let row = gameboard.play(data[1], redTurn);
-                let result = gameboard.checkWinner(row, data[1]);
+                gameboard = game.findGameBoardById(data[1]);
+                let row = gameboard.play(data[2], redTurn);
+                let result = gameboard.checkWinner(row, data[2]);
 
                 if (result.length > 0) {
 
@@ -165,10 +241,15 @@ wss.on('connection', (ws) => {
 
                 let invited = game.getPlayer(data[1]);
                 invited.ws.send('invite' + sep + data[2] + sep + game.getPlayer(data[2])._pseudo);
+                break;
 
-            case 'multiplay':
+            case 'reset':
 
-                game.addGameBoard(new GameBoard())
+                gameboard = game.findGameBoardById(JSON.parse(data[1]));
+                gameboard.reset();
+
+                ws.send('start' + sep + JSON.stringify(gameboard.getCurrentPlayer()._id) + sep + JSON.stringify(gameboard._id));
+                break;
 
         }
 

@@ -1,6 +1,7 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
 }
 
 a {
@@ -9,4 +10,8 @@ a {
 
 .grow:hover {
   transform: scale(1.5);
+}
+
+nav {
+  margin-bottom: 0;
 }

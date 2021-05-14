@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     {% block stylesheet %}
-        <link href="style.css">
+        <link href="stylesheets/style.css">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     {% endblock %}
     <title>{% block title %}Index{% endblock %}</title>
@@ -15,7 +15,7 @@
 
     {% block body %}
 
-    <nav class="navbar navbar-expand-md navbar-light bg-primary mb-3">
+    <nav class="navbar navbar-expand-md navbar-light bg-primary mb-3 user-select-none">
         <div class="container">
             <a href="/" class="navbar-brand">Connect 4</a>
             <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="navbarCollapse">
