@@ -18,7 +18,7 @@ var currentPlayerIndex = 0;
 
 // Mise en ecoute de la WebSocket
 ws.onopen = () => {
-    ws.send('initiateGame' + sep + JSON.stringify(gameboardId));
+    ws.send('initiateGame' + sep + JSON.stringify(gameboardId) + sep + players[0]._id + sep + JSON.stringify(ws));
 };
 
 // Verification de la taille de l'ecran au chargement
@@ -45,11 +45,20 @@ function onHover (event) {
 
     valide = true;
     // hover.setAttribute('visibility', 'visible');
-    let row = event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100;
-    hover.setAttribute('x', row);
-    newPiece.setAttribute('visibility', 'visible');
-    newPiece.setAttribute('cx', row + (svg.clientWidth / 7) / 2);
+    let column = event.clientX - svg.getBoundingClientRect().x - (event.clientX - svg.getBoundingClientRect().x) % 100;
 
+    showPiece(column);
+
+    if (mode === 'multi') {
+        ws.send('hover' + sep + gameboardId + sep + column);
+    }
+}
+
+function showPiece(column) {
+    console.log(column);
+    hover.setAttribute('x', column);
+    newPiece.setAttribute('visibility', 'visible');
+    newPiece.setAttribute('cx', (parseInt(column) + (svg.clientWidth / 7) / 2).toString());
 }
 
 // Quand on clique, si le tour est valide et que la piece precedente est tombee et que le jeu n'est pas termine, on attribue la valeur false a la variable valide puis on affiche le repassage de la colonne en couleur et on recupere la colonne sur laquelle on a joue avant de l'envoyer au serveur pour l'analyser
@@ -62,6 +71,8 @@ function onClick (event) {
         currentPlayerIndex = (currentPlayerIndex + 1) % 2;
         pseudo.textContent = players[currentPlayerIndex]._pseudo;
         ws.send('played' + sep + gameboardId + sep + column);
+        if (mode === 'multi')
+            ws.send('click' + sep + gameboardId + sep + column);
     }
 
 }
@@ -265,6 +276,10 @@ ws.onmessage = (message) => {
             break;
         case 'play':
             playTurn(data[1]);
+            break;
+        case 'hover':
+            console.log(data[1]);
+            showPiece(data[1]);
             break;
         case 'win':
             gameOver(JSON.parse(data[1]));

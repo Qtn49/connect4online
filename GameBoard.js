@@ -5,6 +5,7 @@ class GameBoard {
     _id;
     _board;
     _players = [];
+    _mode;
 
     constructor (player1, player2) {
 
@@ -18,6 +19,14 @@ class GameBoard {
 
     }
 
+    get mode() {
+        return this._mode;
+    }
+
+    set mode(value) {
+        this._mode = value;
+    }
+
     play(column, redTurn) {
 
         for (let i in this._board[column]) {
@@ -29,6 +38,9 @@ class GameBoard {
 
             }
         }
+
+        this.getWaitingPlayer()._playing = true;
+        this.getCurrentPlayer()._playing = false;
 
         return -1;
 
@@ -151,6 +163,14 @@ class GameBoard {
             this.players[1]._playing = true;
     }
 
+    getPlayer (id) {
+
+        return this._players.find(player => {
+            return player._id.toString() === id.toString();
+        });
+
+    }
+
     getCurrentPlayer() {
         return this._players.filter(p => p._playing)[0];
     }
@@ -166,6 +186,13 @@ class GameBoard {
     get players() {
         return this._players;
     }
+
+    sendMessage (message, playerId) {
+
+        this.getPlayer(playerId).ws.send(message);
+
+    }
+
 }
 
 exports.GameBoard = GameBoard;

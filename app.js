@@ -13,7 +13,7 @@ const GameBoard = require('./GameBoard');
 const Player = require('./Player').Player;
 
 var app = express();
-var players = {};
+var players = [];
 
 var game = new Game.Game();
 var redTurn = Math.random() < 0.5;
@@ -93,7 +93,7 @@ app.post('/newPlayer', function(req, res) {
         if (checkPseudo(pseudo)) {
 
             let player = req.session.player = new Player(pseudo);
-            game.addPlayer(player);
+            players.push(player);
 
             res.redirect('/wait');
 
@@ -114,6 +114,7 @@ app.post('/newPlayer', function(req, res) {
         player2._color = 'yellow';
 
         gameboard = new GameBoard.GameBoard(player1, player2);
+        gameboard.mode = 'solo';
         game.addGameBoard(gameboard);
 
         res.render('game.html.twig', {
@@ -135,14 +136,15 @@ app.post('/newPlayer', function(req, res) {
 
 app.get('/newMultiGame', function (req, res) {
 
-    player = game.getPlayer(req.query.id);
-    opponentPlayer = game.getPlayer(req.query.idOpponent);
+    let player = getPlayer(req.query.id);
+    let opponentPlayer = getPlayer(req.query.idOpponent);
 
     if (req.query.invited) {
         player._color = 'red';
         opponentPlayer._color = 'yellow';
 
         gameboard = new GameBoard.GameBoard(player, opponentPlayer);
+        gameboard.mode = 'multi';
         game.addGameBoard(gameboard);
 
         res.render('game.html.twig', {
@@ -203,8 +205,9 @@ wss.on('connection', (ws) => {
         switch (data[0]) {
 
             case 'initiateGame':
-                console.log(data);
                 gameboard = game.findGameBoardById(JSON.parse(data[1]));
+
+                gameboard.getPlayer(data[2]).ws = ws;
 
                 ws.send('start' + sep + JSON.stringify(gameboard.getCurrentPlayer()._id) + sep + JSON.stringify(gameboard._id));
                 break;
@@ -213,34 +216,42 @@ wss.on('connection', (ws) => {
                 gameboard = game.findGameBoardById(data[1]);
                 let row = gameboard.play(data[2], redTurn);
                 let result = gameboard.checkWinner(row, data[2]);
+                let message = 'game' + sep + JSON.stringify(gameboard._board);
 
                 if (result.length > 0) {
 
-                    ws.send('win' + sep + JSON.stringify(redTurn) + sep + JSON.stringify(result));
+                    message = 'win' + sep + JSON.stringify(redTurn) + sep + JSON.stringify(result);
 
                 }
 
                 if (row > -1) {
                     redTurn = !redTurn;
-                    ws.send('play' + sep + row + sep + JSON.stringify(redTurn));
+                    message = 'play' + sep + row + sep + JSON.stringify(redTurn);
                 }
 
-                ws.send('game' + sep + JSON.stringify(gameboard._board));
+                if (gameboard.mode === 'multi')
+                    gameboard.sendMessage(message, gameboard.getWaitingPlayer()._id);
+                ws.send(message);
 
                 break;
             case 'newPlayer':
-                let player = game.getPlayer(data[1]);
+                let player = getPlayer(data[1]);
 
                 player.ws = ws;
 
-                game.broadcast('newPlayer' + sep + JSON.stringify(game._players));
+                broadcast('newPlayer' + sep + JSON.stringify(players));
 
                 break;
 
             case 'invite':
 
-                let invited = game.getPlayer(data[1]);
-                invited.ws.send('invite' + sep + data[2] + sep + game.getPlayer(data[2])._pseudo);
+                let invited = getPlayer(data[1]);
+                invited.ws.send('invite' + sep + data[2] + sep + getPlayer(data[2])._pseudo);
+                break;
+
+            case 'hover':
+                gameboard = game.findGameBoardById(data[1]);
+                gameboard.sendMessage('hover' + sep + data[2], gameboard.getWaitingPlayer()._id);
                 break;
 
             case 'reset':
@@ -256,4 +267,23 @@ wss.on('connection', (ws) => {
     });
 
 });
+
+function getPlayer (id) {
+
+    return players.find(player => {
+        return player._id.toString() === id.toString();
+    });
+
+}
+
+function broadcast (message) {
+
+
+    for (let [,p] of Object.entries(players)) {
+
+        p.ws.send(message);
+
+    }
+
+}
 

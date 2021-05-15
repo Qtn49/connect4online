@@ -38,24 +38,6 @@ class Game {
 
     }
 
-    getPlayer (id) {
-
-        return this._players.find(player => {
-            return player._id.toString() === id.toString();
-        });
-
-    }
-
-    broadcast (message) {
-
-        for (let [,p] of Object.entries(this._players)) {
-
-            p.ws.send(message);
-
-        }
-
-    }
-
 }
 
 exports.Game = Game;
