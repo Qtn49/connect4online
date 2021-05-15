@@ -226,12 +226,17 @@ wss.on('connection', (ws) => {
 
                 if (row > -1) {
                     redTurn = !redTurn;
-                    message = 'play' + sep + row + sep + JSON.stringify(redTurn);
+                    let playMessage = 'play' + sep + row + sep + JSON.stringify(redTurn);
+                    if (gameboard.mode === 'multi')
+                        gameboard.sendMessage(playMessage, gameboard.getWaitingPlayer()._id);
+                    ws.send(playMessage);
                 }
 
                 if (gameboard.mode === 'multi')
                     gameboard.sendMessage(message, gameboard.getWaitingPlayer()._id);
                 ws.send(message);
+
+                gameboard.switchTurn();
 
                 break;
             case 'newPlayer':

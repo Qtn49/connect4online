@@ -39,9 +39,6 @@ class GameBoard {
             }
         }
 
-        this.getWaitingPlayer()._playing = true;
-        this.getCurrentPlayer()._playing = false;
-
         return -1;
 
     }
@@ -189,10 +186,18 @@ class GameBoard {
 
     sendMessage (message, playerId) {
 
+        console.log(this.getPlayer(playerId).ws.readyState);
         this.getPlayer(playerId).ws.send(message);
 
     }
 
+    switchTurn() {
+
+        this._players.forEach(p => {
+            p._playing = !p._playing;
+        });
+
+    }
 }
 
 exports.GameBoard = GameBoard;

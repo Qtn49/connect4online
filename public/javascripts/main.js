@@ -49,7 +49,10 @@ function onHover (event) {
 
     showPiece(column);
 
+    console.log('hovering');
+
     if (mode === 'multi') {
+        console.log('sending');
         ws.send('hover' + sep + gameboardId + sep + column);
     }
 }
@@ -68,8 +71,6 @@ function onClick (event) {
         valide = false;
         hover.setAttribute('visibility', 'visible');
         column = parseInt((event.clientX - svg.getBoundingClientRect().x) / 100);
-        currentPlayerIndex = (currentPlayerIndex + 1) % 2;
-        pseudo.textContent = players[currentPlayerIndex]._pseudo;
         ws.send('played' + sep + gameboardId + sep + column);
         if (mode === 'multi')
             ws.send('click' + sep + gameboardId + sep + column);
@@ -111,7 +112,6 @@ function setPlayerColor () {
 // Execution du tour : on place la nouvelle piece puis on la fait descendre a l'aide de la fonction goDown qu'on exeecute toutes les 10ms jusqu'a ce que la piece soit tombee
 function playTurn (row) {
 
-    console.log()
     var hoverClone = hover.cloneNode(), newPieceClone = newPiece.cloneNode();
     newPieceClone.setAttribute('row', row);
     newPieceClone.setAttribute('column', column);
@@ -120,6 +120,8 @@ function playTurn (row) {
     if (mode === 'multi')
         userTurn = !userTurn;
     play = setInterval(goDown, 10, newPieceClone, svg.appendChild(hoverClone), row);
+    currentPlayerIndex = (currentPlayerIndex + 1) % 2;
+    updateCurrentPlayerName();
     hideAll();
     setPlayerColor();
 
@@ -188,6 +190,15 @@ function gameOver (redTurn) {
 }
 
 
+function updateCurrentPlayerName() {
+
+    if (currentPlayerIndex === 0 && mode === 'multi')
+        pseudo.textContent = 'Your';
+    else
+        pseudo.textContent = players[currentPlayerIndex]._pseudo + "'s";
+
+}
+
 function setCurrentPlayer(firstPlayerId) {
 
     players.forEach((player, i) => {
@@ -195,10 +206,7 @@ function setCurrentPlayer(firstPlayerId) {
             currentPlayerIndex = i;
     });
 
-    if (currentPlayerIndex === 0 && mode === 'multi')
-        pseudo.textContent = 'Your';
-    else
-        pseudo.textContent = players[currentPlayerIndex]._pseudo + "'s";
+    updateCurrentPlayerName();
 
 }
 
